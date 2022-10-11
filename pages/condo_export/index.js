@@ -5,9 +5,7 @@ import CondoReportSearch from './condoReportsearch'
 export default function CondoReport() {
   return (
     <div>
-      <Grid>
         <CondoReportSearch/>
-      </Grid>
     </div>
   )
 }

@@ -8,14 +8,15 @@ import DataTable from '../components/datatable/dataTable'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ArticleIcon from '@mui/icons-material/Article';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import OverwriteAdapterDayjs from "../../pages/components/date_adapter/OverwriteLibs";
 import thDate from "dayjs/locale/th";
 import dayjs from "dayjs"
 import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers'
 import DialogDetail from './dialog/dialogDetail'
 import SearchIcon from '@mui/icons-material/Search';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import { ColorAlerts } from '../../src/snackbar'
+// import { ColorAlerts } from '../../src/snackbar'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import axios from 'axios'
 
 const Menu1 = {
   marginLeft: 10,
@@ -47,18 +48,29 @@ export default function CondoReportSearch() {
   const [province, setProvince] = React.useState([]);
   const [valueprovince, setValueprovince] = React.useState(null);
   const [dateTimeStart, setDateTimeStart] = React.useState(null);
+  const [announcementDate, setAnnouncementDate] = React.useState(null);
   const [condoSID, setCondoSID] = React.useState(null);
   const [valueOnselect, setValueOnselect] = React.useState([]);
   const [errorSeach, setErrorSeach] = React.useState(false);
   const [errorApprove, setErrorApprove] = React.useState(false);
+  const [value, setValue] = React.useState(dayjs('2014-08-18T21:11:54'));
+
 
   const _resMasProvince = async () => {
+    // try {
+    //   let res = await ServiceProvince.masProvince();
+    //   console.log(res, '_resMasProvince');
+    //   await setProvince(res);
+    // } catch (e) {
+    //   console.log(e);
+    // }
     try {
-      let res = await ServiceProvince.masProvince();
-      console.log(res, '_resMasProvince');
-      await setProvince(res);
-    } catch (e) {
-      console.log(e);
+      const res = await fetch(`${process.env.hostAPI}/MAS/province`);
+      const data = await res.json();
+      // console.log(data);
+      await setProvince(data);
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -71,16 +83,28 @@ export default function CondoReportSearch() {
   const handleChangeStartDate = (value) => {
     setDateTimeStart(value)
     setErrorApprove(false)
+    // console.log(dayjs(value).format("-MM-DD"), value.$y);
+
+  }
+
+  const handleChangeAnnouncementDate = (value) => {
+    setAnnouncementDate(value)
+    setErrorApprove(false)
   }
 
 
   const sel_condoExportByProvinceId = async (el) => {
+    let url = `${process.env.hostCondo}/condo/condoExportByProvinceId`
     try {
-      let res = await ServiceCondo.getCondoExportByProvince(el)
-      console.log(res, 'sel_condoExportByProvinceId');
+      // let res = await ServiceCondo.getCondoExportByProvince(el)
+      // console.log(res, 'sel_condoExportByProvinceId');
+      let resdata = await axios.post(url, el)
+      let data = resdata.data
+
+      console.log(data,'sel_condoExportByProvinceId');
       let newData = []
-      for (const i in res) {
-        let dataitems = res[i]
+      for (const i in data) {
+        let dataitems = data[i]
         // dataitems.action = ""
         dataitems.STATUS_VAL = ""
         if (dataitems.ORDER_STATUS == '4') {
@@ -160,7 +184,7 @@ export default function CondoReportSearch() {
 
   const req_insOrderVal = async () => {
     for (var i in valueOnselect) {
-      let data = {
+      let dataset = {
         CHANGWAT_CODE: valueprovince.PROVINCE_ID,
         BRANCH_CODE: valueOnselect[i].BRANCH,
         PERIODS_ID: "7",
@@ -173,8 +197,11 @@ export default function CondoReportSearch() {
         PUBLIC_DATE: dayjs(dateTimeStart).format("YYYY-MM-DD")
       }
       try {
-        let req = await ServiceOrderval.insOrderVal(data)
-        console.log(req, 'req_insOrderVal');
+        let url = `${process.env.hostCondo}/condo/insOrderVal`
+        // let req = await ServiceOrderval.insOrderVal(data)
+        let res = await axios.post(url, dataset)
+        let data = res.data
+        console.log(data, 'req_insOrderVal');
         sel_condoExportByProvinceId()
       } catch (e) {
         console.log(e);
@@ -215,7 +242,7 @@ export default function CondoReportSearch() {
 
       <Box>
         <Grid container>
-          <Grid xs={12} sx={Menu1}>
+          <Grid item xs={12} sx={Menu1}>
             <Grid container sx={Tab}>
               <Typography variant="text" sx={{ ml: '2%' }}>กรุณาระบุรายละเอียดเพื่อค้นหา</Typography>
             </Grid>
@@ -254,21 +281,41 @@ export default function CondoReportSearch() {
 
           <Grid xs={12} sx={Menu2}>
             <Grid container sx={Tab}>
-              <CalendarMonthIcon /> {'บันทึกวันที่ แต่ละสำนักงานที่ดิน (ถ้ายังไม่ได้กำหนด หรือต้องการแก้ไข)'}
+              <CalendarMonthIcon /> {'บันทึกวันที่ (ถ้ายังไม่ได้กำหนด หรือต้องการแก้ไข)'}
             </Grid>
             <Grid container >
               <Grid item xs={12} py={2} px={3}>
                 <Stack direction={'row'} justifyContent={'center'} spacing={5}>
-                  <LocalizationProvider dateAdapter={OverwriteAdapterDayjs} locale={thDate}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} locale={thDate}>
                     <MobileDatePicker
                       openTo="year"
-                      inputFormat="DD MMMM BBBB"
+                      inputFormat="DD MMMM YYYY"
                       disableMaskedInput={true}
                       views={["year", "month", "day"]}
-                      label="วันที่ประกาศ"
+                      label="เมื่อวันที่"
                       value={dateTimeStart}
                       error={dateTimeStart == null}
                       onChange={handleChangeStartDate}
+                      renderInput={(params) =>
+                        <TextField {...params}
+                          id="bootstrap-input"
+                          {...params}
+                          size="small"
+                          fullWidth
+                          error={errorApprove}
+                        />}
+                    />
+                  </LocalizationProvider>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} locale={thDate}>
+                    <MobileDatePicker
+                      openTo="year"
+                      inputFormat="DD MMMM YYYY"
+                      disableMaskedInput={true}
+                      views={["year", "month", "day"]}
+                      label="ทั้งนี้ตั้งแต่วันที่"
+                      value={announcementDate}
+                      error={announcementDate == null}
+                      onChange={handleChangeAnnouncementDate}
                       renderInput={(params) =>
                         <TextField {...params}
                           id="bootstrap-input"

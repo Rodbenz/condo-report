@@ -2,8 +2,9 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from 
 import React from 'react'
 
 export default function DialogDetail(props) {
-    const current_url = new URL('' + window.location.href);
-    const url = current_url.protocol + "//" + `${process.env.hostDetail}` + "/report_condo.php?condo_s_id=" + props.condoSID;
+    // const current_url = new URL('' + window.location.href);
+    // console.log(current_url,'current_urlcurrent_url');
+    const url =  `http://${process.env.hostDetail}` + "/report_condo.php?condo_s_id=" + props.condoSID;
     console.log(url,'urlurlurl');
     return (
         <div>
