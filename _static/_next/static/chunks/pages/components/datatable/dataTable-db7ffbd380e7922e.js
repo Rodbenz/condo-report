@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[611],{5825:function(n,_,t){(window.__NEXT_P=window.__NEXT_P||[]).push(["/components/datatable/dataTable",function(){return t(9354)}])}},function(n){n.O(0,[251,562,424,774,888,179],function(){return n(n.s=5825)}),_N_E=n.O()}]);

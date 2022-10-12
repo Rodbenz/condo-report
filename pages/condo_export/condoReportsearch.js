@@ -1,9 +1,9 @@
 import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import React from 'react'
-import * as ServiceProvince from '../../service/mas/province'
-import * as ServiceCondo from '../../service/condo'
-import * as ServiceOrderval from '../../service/orderval'
+// import * as ServiceProvince from '../../service/mas/province'
+// import * as ServiceCondo from '../../service/condo'
+// import * as ServiceOrderval from '../../service/orderval'
 import DataTable from '../components/datatable/dataTable'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -14,9 +14,12 @@ import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers'
 import DialogDetail from './dialog/dialogDetail'
 import SearchIcon from '@mui/icons-material/Search';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-// import { ColorAlerts } from '../../src/snackbar'
+import OverwriteAdapterDayjs from '../../src/date_adapter/OverwriteLibs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import axios from 'axios'
+import { SnackbarSet } from '../../src/snackbar'
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 const Menu1 = {
   marginLeft: 10,
@@ -27,8 +30,8 @@ const Menu1 = {
   maxwidth: '1200px'
 }
 const Menu2 = {
-  marginLeft: 60,
-  marginRight: 60,
+  marginLeft: 20,
+  marginRight: 20,
   borderRadius: '6px',
   boxShadow: '4px 5px 18px rgba(0, 0, 0, 0.25)',
   mt: '3%',
@@ -53,25 +56,23 @@ export default function CondoReportSearch() {
   const [valueOnselect, setValueOnselect] = React.useState([]);
   const [errorSeach, setErrorSeach] = React.useState(false);
   const [errorApprove, setErrorApprove] = React.useState(false);
-  const [value, setValue] = React.useState(dayjs('2014-08-18T21:11:54'));
-
 
   const _resMasProvince = async () => {
-    try {
-      let res = await ServiceProvince.masProvince();
-      console.log(res, '_resMasProvince');
-      await setProvince(res);
-    } catch (e) {
-      console.log(e);
-    }
     // try {
-    //   const res = await fetch(`${process.env.hostAPI}/MAS/province`);
-    //   const data = await res.json();
-    //   // console.log(data);
-    //   await setProvince(data);
-    // } catch (err) {
-    //   console.log(err);
+    //   let res = await ServiceProvince.masProvince();
+    //   console.log(res, '_resMasProvince');
+    //   await setProvince(res);
+    // } catch (e) {
+    //   console.log(e);
     // }
+    try {
+      const res = await fetch(`${process.env.hostAPI}/MAS/province`);
+      const data = await res.json();
+      // console.log(data);
+      await setProvince(data);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   const handleMasProvince = (event, value) => {
@@ -87,8 +88,11 @@ export default function CondoReportSearch() {
 
   }
 
+
+
   const handleChangeAnnouncementDate = (value) => {
     setAnnouncementDate(value)
+    console.log(value);
     setErrorApprove(false)
   }
 
@@ -101,7 +105,7 @@ export default function CondoReportSearch() {
       let resdata = await axios.post(url, el)
       let data = resdata.data
 
-      console.log(data,'sel_condoExportByProvinceId');
+      console.log(data, 'sel_condoExportByProvinceId');
       let newData = []
       for (const i in data) {
         let dataitems = data[i]
@@ -147,7 +151,10 @@ export default function CondoReportSearch() {
     } else {
       data.PROVINCE_ID = null
       setErrorSeach(true)
-      // ColorAlerts()
+      // SnackbarSet('กรุณาเลือกจังหวัด !','error')
+      NotificationManager.error('กรุณาเลือกจังหวัด', '', 5000, () => {
+        alert('callback');
+      });
       return
     }
 
@@ -166,8 +173,11 @@ export default function CondoReportSearch() {
     setCondoSID(null)
   }
   const onSubmitApprove = () => {
-    if (dateTimeStart == null) {
+    if (dateTimeStart == null || announcementDate == null) {
       setErrorApprove(true)
+      NotificationManager.error('', 'กรุณากรอกวันที่ทั้งหมด !', 5000, () => {
+        alert('callback');
+      });
       return false
     }
     req_insOrderVal()
@@ -183,6 +193,13 @@ export default function CondoReportSearch() {
   }
 
   const req_insOrderVal = async () => {
+    console.log(valueOnselect, 'valueOnselect');
+    if (valueOnselect == '') {
+      NotificationManager.error('', 'กรุณารายการคอนโด !', 5000, () => {
+        alert('callback');
+      });
+      return false
+    }
     for (var i in valueOnselect) {
       let dataset = {
         CHANGWAT_CODE: valueprovince.PROVINCE_ID,
@@ -194,14 +211,22 @@ export default function CondoReportSearch() {
         ORDER_TYPE: "1",
         ORDER_STATUS: "4",
         CREATE_BY: "1111111111",
-        PUBLIC_DATE: dayjs(dateTimeStart).format("YYYY-MM-DD")
+        PUBLIC_DATE: null,
+        APPROVE_DATE: dayjs(dateTimeStart).format("YYYY-MM-DD"),
+        ENFORCE_DATE: dayjs(announcementDate).format("YYYY-MM-DD")
       }
+      // console.log(dataset);
+      // return
       try {
         let url = `${process.env.hostCondo}/condo/insOrderVal`
         // let req = await ServiceOrderval.insOrderVal(data)
         let res = await axios.post(url, dataset)
         let data = res.data
-        console.log(data, 'req_insOrderVal');
+        if (data) {
+          NotificationManager.success('', 'อนุมัติลงนามเรียบร้อย', 5000, () => {
+            alert('callback');
+          });
+        }
         sel_condoExportByProvinceId()
       } catch (e) {
         console.log(e);
@@ -226,12 +251,20 @@ export default function CondoReportSearch() {
     // }
   ];
 
+  const clearDataAll = () => {
+    setValueprovince(null)
+    setDateTimeStart(null)
+    setAnnouncementDate(null)
+    setDatalist([])
+  }
+
   React.useEffect(() => {
     _resMasProvince()
   }, [])
 
   return (
     <div>
+      <NotificationContainer />
       {condoSID && (
         <DialogDetail
           condoSID={condoSID}
@@ -248,37 +281,74 @@ export default function CondoReportSearch() {
             </Grid>
             <Grid container sx={{ pt: '2%' }}  >
               <Grid item xs={12}>
-                <Stack direction={'row'} justifyContent={'center'} py={2} spacing={2}>
-                  <Autocomplete
-                    id="Province"
-                    options={province}
-                    onChange={handleMasProvince}
-                    getOptionLabel={(option) => option.PROVINCE_NAME_TH}
-                    value={valueprovince}
-                    sx={{ width: '50%' }}
-                    renderInput={(params) => <TextField {...params}
-                      label={
-                        <div>
-                          <Typography variant="text" >จังหวัด</Typography>
-                          <Typography variant="text" color="#d50000"> *</Typography>
-                        </div>}
-                      size="small"
-                      error={errorSeach}
-                    />}
-                  />
-                  <Button onClick={onHandleSubmit} variant='contained' size='small'>
-                    <SearchIcon />
-                    ค้นหา
-                  </Button>
-                  <Button variant='contained' color='error' size='small'>
-                    <HighlightOffIcon />
-                    ล้างค่า
-                  </Button>
-                </Stack>
+                {/* <Stack direction={'row'} justifyContent={'center'} spacing={2}> */}
+                <Grid container spacing={2} px={5} pb={3}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Autocomplete
+                      id="Province"
+                      options={province}
+                      onChange={handleMasProvince}
+                      getOptionLabel={(option) => option.PROVINCE_NAME_TH}
+                      value={valueprovince}
+                      // sx={{ width: '50%' }}
+                      renderInput={(params) => <TextField {...params}
+                        label={
+                          <div>
+                            <Typography variant="text" >จังหวัด</Typography>
+                            <Typography variant="text" color="#d50000"> *</Typography>
+                          </div>}
+                        size="small"
+                        error={errorSeach}
+                      />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Autocomplete
+                      id="Province"
+                      options={province}
+                      onChange={handleMasProvince}
+                      getOptionLabel={(option) => option.PROVINCE_NAME_TH}
+                      value={valueprovince}
+                      // sx={{ width: '50%' }}
+                      renderInput={(params) => <TextField {...params}
+                        label={
+                          <div>
+                            <Typography variant="text" >สำนักงาน</Typography>
+                            <Typography variant="text" color="#d50000"> *</Typography>
+                          </div>}
+                        size="small"
+                        error={errorSeach}
+                      />}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Stack direction={'row'} justifyContent={'center'} spacing={2}>
+                      <Button
+                        onClick={onHandleSubmit}
+                        variant='contained'
+                        size='small'
+                      >
+                        <SearchIcon />
+                        ค้นหา
+                      </Button>
+                      <Button
+                        variant='contained'
+                        color='error'
+                        size='small'
+                        onClick={clearDataAll}
+                      >
+                        <HighlightOffIcon />
+                        ล้างค่า
+                      </Button>
+                    </Stack>
+                  </Grid>
+                </Grid>
+                {/* </Stack> */}
               </Grid>
             </Grid>
           </Grid>
-
+        </Grid>
+        <Grid container>
           <Grid xs={12} sx={Menu2}>
             <Grid container sx={Tab}>
               <CalendarMonthIcon /> {'บันทึกวันที่ (ถ้ายังไม่ได้กำหนด หรือต้องการแก้ไข)'}
@@ -286,10 +356,10 @@ export default function CondoReportSearch() {
             <Grid container >
               <Grid item xs={12} py={2} px={3}>
                 <Stack direction={'row'} justifyContent={'center'} spacing={5}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs} locale={thDate}>
+                  <LocalizationProvider dateAdapter={OverwriteAdapterDayjs} locale={thDate}>
                     <MobileDatePicker
                       openTo="year"
-                      inputFormat="DD MMMM YYYY"
+                      inputFormat="DD MMMM BBBB"
                       disableMaskedInput={true}
                       views={["year", "month", "day"]}
                       label="เมื่อวันที่"
@@ -306,10 +376,10 @@ export default function CondoReportSearch() {
                         />}
                     />
                   </LocalizationProvider>
-                  <LocalizationProvider dateAdapter={AdapterDayjs} locale={thDate}>
+                  <LocalizationProvider dateAdapter={OverwriteAdapterDayjs} locale={thDate}>
                     <MobileDatePicker
                       openTo="year"
-                      inputFormat="DD MMMM YYYY"
+                      inputFormat="DD MMMM BBBB"
                       disableMaskedInput={true}
                       views={["year", "month", "day"]}
                       label="ทั้งนี้ตั้งแต่วันที่"
