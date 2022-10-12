@@ -57,21 +57,21 @@ export default function CondoReportSearch() {
 
 
   const _resMasProvince = async () => {
-    // try {
-    //   let res = await ServiceProvince.masProvince();
-    //   console.log(res, '_resMasProvince');
-    //   await setProvince(res);
-    // } catch (e) {
-    //   console.log(e);
-    // }
     try {
-      const res = await fetch(`${process.env.hostAPI}/MAS/province`);
-      const data = await res.json();
-      // console.log(data);
-      await setProvince(data);
-    } catch (err) {
-      console.log(err);
+      let res = await ServiceProvince.masProvince();
+      console.log(res, '_resMasProvince');
+      await setProvince(res);
+    } catch (e) {
+      console.log(e);
     }
+    // try {
+    //   const res = await fetch(`${process.env.hostAPI}/MAS/province`);
+    //   const data = await res.json();
+    //   // console.log(data);
+    //   await setProvince(data);
+    // } catch (err) {
+    //   console.log(err);
+    // }
   }
 
   const handleMasProvince = (event, value) => {
