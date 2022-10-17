@@ -8,8 +8,8 @@ const nextConfig = {
   env: {
     v: "1.0002",
     hostAPI: 'http://192.168.41.123:8094',
-    hostCondo: 'http://localhost:8093',
-    // hostCondo: 'http://192.168.41.123:8093',
+    // hostCondo: 'http://localhost:8093',
+    hostCondo: 'http://192.168.45.115:8093',
     hostDetail: '192.168.41.14/CONDO'
   }
 }

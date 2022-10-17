@@ -49,12 +49,15 @@ const Tab = {
 export default function CondoReportSearch() {
   const [dataList, setDatalist] = React.useState([]);
   const [province, setProvince] = React.useState([]);
+  const [branch, setbBranch] = React.useState([]);
   const [valueprovince, setValueprovince] = React.useState(null);
+  const [valuebranch, setValuebranch] = React.useState(null);
   const [dateTimeStart, setDateTimeStart] = React.useState(null);
   const [announcementDate, setAnnouncementDate] = React.useState(null);
   const [condoSID, setCondoSID] = React.useState(null);
   const [valueOnselect, setValueOnselect] = React.useState([]);
   const [errorSeach, setErrorSeach] = React.useState(false);
+  const [errorSeach1, setErrorSeach1] = React.useState(false);
   const [errorApprove, setErrorApprove] = React.useState(false);
 
   const _resMasProvince = async () => {
@@ -74,11 +77,33 @@ export default function CondoReportSearch() {
       console.log(err);
     }
   }
+  const _resMasBybranchCode = async (el) => {
+    // console.log(el);
+    let dataset = {
+      CHANGWAT_CODE: el == null ? "" : el.PROVINCE_ID
+    }
+    let url = `${process.env.hostCondo}/MAS/provinceBybranch`
+    try {
+      let resdata = await axios.post(url, dataset)
+      let data = resdata.data
+
+      console.log(data);
+      await setbBranch(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   const handleMasProvince = (event, value) => {
     console.log(value);
     setValueprovince(value);
+    _resMasBybranchCode(value)
     setErrorSeach(false)
+  }
+  const handleBybranchCode = (event, value) => {
+    console.log(value);
+    setValuebranch(value);
+    setErrorSeach1(false)
   }
 
   const handleChangeStartDate = (value) => {
@@ -87,9 +112,6 @@ export default function CondoReportSearch() {
     // console.log(dayjs(value).format("-MM-DD"), value.$y);
 
   }
-
-
-
   const handleChangeAnnouncementDate = (value) => {
     setAnnouncementDate(value)
     console.log(value);
@@ -105,7 +127,7 @@ export default function CondoReportSearch() {
       let resdata = await axios.post(url, el)
       let data = resdata.data
 
-      console.log(data, 'sel_condoExportByProvinceId');
+      // console.log(data, 'sel_condoExportByProvinceId');
       let newData = []
       for (const i in data) {
         let dataitems = data[i]
@@ -157,6 +179,15 @@ export default function CondoReportSearch() {
       });
       return
     }
+    if(valuebranch != null){
+
+    }else{
+      setErrorSeach1(true)
+      NotificationManager.error('กรุณาเลือกสำนักงาน', '', 5000, () => {
+        alert('callback');
+      });
+      return
+    }
 
     sel_condoExportByProvinceId(data)
   }
@@ -200,6 +231,7 @@ export default function CondoReportSearch() {
       });
       return false
     }
+    let chackAlert = []
     for (var i in valueOnselect) {
       let dataset = {
         CHANGWAT_CODE: valueprovince.PROVINCE_ID,
@@ -223,15 +255,18 @@ export default function CondoReportSearch() {
         let res = await axios.post(url, dataset)
         let data = res.data
         if (data) {
-          NotificationManager.success('', 'อนุมัติลงนามเรียบร้อย', 5000, () => {
-            alert('callback');
-          });
+          chackAlert.push(valueOnselect[i].BRANCH)
         }
         sel_condoExportByProvinceId()
       } catch (e) {
         console.log(e);
       }
 
+    }
+    if (chackAlert.pop()) {
+      NotificationManager.success('', 'อนุมัติลงนามเรียบร้อย', 5000, () => {
+        alert('callback');
+      });
     }
 
   }
@@ -305,10 +340,10 @@ export default function CondoReportSearch() {
                   <Grid item xs={12} sm={6} md={4}>
                     <Autocomplete
                       id="Province"
-                      options={province}
-                      onChange={handleMasProvince}
-                      getOptionLabel={(option) => option.PROVINCE_NAME_TH}
-                      value={valueprovince}
+                      options={branch}
+                      onChange={handleBybranchCode}
+                      getOptionLabel={(option) => option.BRANCH_NAME}
+                      value={valuebranch}
                       // sx={{ width: '50%' }}
                       renderInput={(params) => <TextField {...params}
                         label={
@@ -317,7 +352,7 @@ export default function CondoReportSearch() {
                             <Typography variant="text" color="#d50000"> *</Typography>
                           </div>}
                         size="small"
-                        error={errorSeach}
+                        error={errorSeach1}
                       />}
                     />
                   </Grid>
