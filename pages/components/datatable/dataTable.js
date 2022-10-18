@@ -53,6 +53,7 @@ export default function DataTable(props) {
   const [curPage, setCurPage] = React.useState(1);
   const [excludeColum, setExcludeColum] = React.useState([]);
   const [colum, setColum] = React.useState(props.colum);
+  const [itemsChecked, setItemsChecked] = React.useState(false);
   const [selectedData, setSelectedData] = React.useState(
     props.selectedData ? props.selectedData : []
   );
@@ -252,6 +253,12 @@ export default function DataTable(props) {
     color: '#AFAFAF',
   }
 
+  const selectItem = (e) => {
+    if (props.onSelect) {
+      props.onSelect(props.data);
+    }
+  };
+
 
   return (
     <div>
@@ -322,13 +329,13 @@ export default function DataTable(props) {
           <TableContainer>
             <Table sx={{ minWidth: "1100px", height: "auto" }}>
               <TableHead>
-                <TableRow sx={{ backgroundColor: "#006E61" }}>
+                <TableRow sx={{ backgroundColor: "#4267b2" }}>
                   {data && data[0]?.hasOwnProperty("collapse") && (
                     <TableCell width={"2%"}></TableCell>
                   )}
                   {props.onSelect && (
                     <TableCell width={"5%"}>
-                      <Checkbox size="small" />
+                      <Checkbox size="small" checked={itemsChecked} onClick={selectItem}/>
                     </TableCell>
                   )}
                   {colum?.map(
