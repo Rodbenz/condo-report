@@ -38,7 +38,7 @@ const Menu2 = {
   maxwidth: '1200px'
 }
 const Tab = {
-  bgcolor: '#006E61',
+  bgcolor: '#4267b2',
   padding: '1%',
   color: 'white',
   borderTopLeftRadius: '6px',
