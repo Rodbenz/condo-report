@@ -6,7 +6,7 @@ import HeaderAppbar from './components/navbar'
 function MyApp({ Component, pageProps }) {
   return (
     <div>
-      <HeaderAppbar/>
+      {/* <HeaderAppbar/> */}
       <SnackBarDiaLog />
       <Component {...pageProps} />
       {/* <Footer/> */}
