@@ -20,6 +20,7 @@ import axios from 'axios'
 import { SnackbarSet } from '../../src/snackbar'
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import { AddLoading, RemoveLoading } from "./../components/loadingscreen";
 
 const Menu1 = {
   marginLeft: 10,
@@ -68,13 +69,16 @@ export default function CondoReportSearch() {
     // } catch (e) {
     //   console.log(e);
     // }
+    AddLoading()
     try {
       const res = await fetch(`${process.env.hostAPI}/MAS/province`);
       const data = await res.json();
       // console.log(data);
       await setProvince(data);
+      RemoveLoading()
     } catch (err) {
       console.log(err);
+      RemoveLoading()
     }
   }
   const _resMasBybranchCode = async (el) => {
@@ -83,14 +87,17 @@ export default function CondoReportSearch() {
       CHANGWAT_CODE: el == null ? "" : el.PROVINCE_ID
     }
     let url = `${process.env.hostCondo}/MAS/provinceBybranch`
+    AddLoading()
     try {
       let resdata = await axios.post(url, dataset)
       let data = resdata.data
 
       console.log(data);
       await setbBranch(data);
+      RemoveLoading()
     } catch (err) {
       console.log(err);
+      RemoveLoading()
     }
   }
 
@@ -121,6 +128,7 @@ export default function CondoReportSearch() {
 
   const sel_condoExportByProvinceId = async (el) => {
     let url = `${process.env.hostCondo}/condo/condoExportByProvinceId`
+    AddLoading()
     try {
       // let res = await ServiceCondo.getCondoExportByProvince(el)
       // console.log(res, 'sel_condoExportByProvinceId');
@@ -161,8 +169,10 @@ export default function CondoReportSearch() {
         newData.push(dataitems)
       }
       await setDatalist(newData)
+      RemoveLoading()
     } catch (e) {
       console.log(e);
+      RemoveLoading()
     }
   }
 
@@ -231,6 +241,7 @@ export default function CondoReportSearch() {
       });
       return false
     }
+    AddLoading()
     let chackAlert = []
     for (var i in valueOnselect) {
       let dataset = {
@@ -260,6 +271,7 @@ export default function CondoReportSearch() {
         sel_condoExportByProvinceId()
       } catch (e) {
         console.log(e);
+        RemoveLoading()
       }
 
     }
@@ -267,6 +279,7 @@ export default function CondoReportSearch() {
       NotificationManager.success('', 'อนุมัติลงนามเรียบร้อย', 5000, () => {
         alert('callback');
       });
+      RemoveLoading()
     }
 
   }

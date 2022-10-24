@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  assetPrefix: '/condo-report',
+  // assetPrefix: '/condo-report',
   // rewrites() {
   //   return [
   //     { source: '/_cuttom/_next/:path*', destination: '/_next/:path*' }

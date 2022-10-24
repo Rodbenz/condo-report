@@ -54,6 +54,7 @@ export default function DataTable(props) {
   const [excludeColum, setExcludeColum] = React.useState([]);
   const [colum, setColum] = React.useState(props.colum);
   const [itemsChecked, setItemsChecked] = React.useState(false);
+  const [checkedList, setCheckedList] = React.useState([]);
   const [selectedData, setSelectedData] = React.useState(
     props.selectedData ? props.selectedData : []
   );
@@ -193,36 +194,7 @@ export default function DataTable(props) {
     await setSingleSelectData(el);
   };
 
-  const _onClick = async (el) => {
-    console.log(el);
-    let newData = selectedData;
-    for (var i in newData) {
-      if (Object.is(el, newData[i])) {
-        // console.log(true, i)
-        newData.splice(i, 1);
-        await setSelectedData([]);
-        await setSelectedData(newData);
-        return;
-      }
-    }
-    newData.push(el);
-    // console.log(newData)
-    await setSelectedData([]);
-    await setSelectedData(newData);
-    if (props.onSelect) {
-      props.onSelect(newData);
-    }
-  };
-  const _isSelected = (el) => {
-    let newData = selectedData;
-    for (var i in newData) {
-      if (Object.is(el, newData[i])) {
-        // console.log(true, i)
-        return true;
-      }
-    }
-    return false;
-  };
+  
   const _handleChageColumVisible = async (value) => {
     //console.log(value)
     await setExcludeColum([]);
@@ -253,10 +225,51 @@ export default function DataTable(props) {
     color: '#AFAFAF',
   }
 
-  const selectItem = (e) => {
-    if (props.onSelect) {
-      props.onSelect(props.data);
+  const selectItem = async (e) => {
+    const { checked } = e.target;
+    const collection = [];
+
+    if (checked) {
+      for (const category of props.data) {
+          collection.push(category);
+      }
     }
+    await setSelectedData(collection);
+    await setItemsChecked(checked)
+    if (props.onSelect) {
+      props.onSelect(collection);
+    }
+  };
+
+  const _onClick = async (el) => {
+    console.log(el);
+    let newData = selectedData;
+    for (var i in newData) {
+      if (Object.is(el, newData[i])) {
+        // console.log(true, i)
+        newData.splice(i, 1);
+        await setSelectedData([]);
+        await setSelectedData(newData);
+        return;
+      }
+    }
+    newData.push(el);
+    // console.log(newData)
+    await setSelectedData([]);
+    await setSelectedData(newData);
+    if (props.onSelect) {
+      props.onSelect(newData);
+    }
+  };
+  const _isSelected = (el) => {
+    let newData = selectedData;
+    for (var i in newData) {
+      if (Object.is(el, newData[i])) {
+        // console.log(true, i)
+        return true;
+      }
+    }
+    return false;
   };
 
 
@@ -335,7 +348,7 @@ export default function DataTable(props) {
                   )}
                   {props.onSelect && (
                     <TableCell width={"5%"}>
-                      <Checkbox size="small" checked={itemsChecked} onClick={selectItem}/>
+                      <Checkbox size="small" checked={itemsChecked} onClick={selectItem.bind(this)}/>
                     </TableCell>
                   )}
                   {colum?.map(
@@ -408,8 +421,9 @@ export default function DataTable(props) {
                             <TableCell>
                               <Checkbox
                                 size="medium"
-                                checked={_isSelected(el)}
-                                onClick={() => _onClick(el)}
+                                // checked={_isSelected(el)}
+                                checked={selectedData.includes(el)}
+                                onChange={() => _onClick(el)}
                                 sx={{ ml: 1 }}
                               />
                             </TableCell>
