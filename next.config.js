@@ -1,22 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // assetPrefix: '/condo-report',
+  assetPrefix: '/test_next',
+  // homepage: '/test_next',
   // rewrites() {
   //   return [
-  //     { source: '/_cuttom/_next/:path*', destination: '/_next/:path*' }
+  //     { source: '/test_next/_next/:path*', destination: '/_next/:path*' }
   //   ]
   // },
+  // basePath: '/test_next',
   swcMinify: true,
   images: {
     unoptimized: true
   },
   env: {
     v: "1.0002",
-    hostAPI: 'http://192.168.41.123:8094',
+    hostAPI: 'http://p-portal.treasury.go.th/trd-cupcake',
     // hostCondo: 'http://localhost:8093',
-    hostCondo: 'http://192.168.41.123:8093',
-    hostDetail: '192.168.41.14/CONDO'
+    // hostCondo: 'http://192.168.41.123:8093',
+    hostDetail: 'https://p-portal.treasury.go.th/land/report_condo/'
   },
 }
 

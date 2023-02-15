@@ -1,7 +1,7 @@
 import { Autocomplete, Box, Button, Grid, IconButton, TextField, Typography } from '@mui/material'
 import { Stack } from '@mui/system'
 import React from 'react'
-// import * as ServiceProvince from '../../service/mas/province'
+import * as ServiceProvince from '../../service/mas/province'
 // import * as ServiceCondo from '../../service/condo'
 // import * as ServiceOrderval from '../../service/orderval'
 import DataTable from '../components/datatable/dataTable'
@@ -71,7 +71,7 @@ export default function CondoReportSearch() {
     // }
     AddLoading()
     try {
-      const res = await fetch(`${process.env.hostAPI}/MAS/province`);
+      const res = await fetch(`${process.env.hostAPI}/MAS/selProvince`);
       const data = await res.json();
       // console.log(data);
       await setProvince(data);
@@ -86,7 +86,7 @@ export default function CondoReportSearch() {
     let dataset = {
       CHANGWAT_CODE: el == null ? "" : el.PROVINCE_ID
     }
-    let url = `${process.env.hostCondo}/MAS/provinceBybranch`
+    let url = `${process.env.hostAPI}/MAS/provinceBybranch`
     AddLoading()
     try {
       let resdata = await axios.post(url, dataset)
@@ -127,7 +127,7 @@ export default function CondoReportSearch() {
 
 
   const sel_condoExportByProvinceId = async (el) => {
-    let url = `${process.env.hostCondo}/condo/condoExportByProvinceId`
+    let url = `${process.env.hostAPI}/condo/condoExportByProvinceId`
     AddLoading()
     try {
       // let res = await ServiceCondo.getCondoExportByProvince(el)
@@ -189,9 +189,9 @@ export default function CondoReportSearch() {
       });
       return
     }
-    if(valuebranch != null){
+    if (valuebranch != null) {
 
-    }else{
+    } else {
       setErrorSeach1(true)
       NotificationManager.error('กรุณาเลือกสำนักงาน', '', 5000, () => {
         alert('callback');
@@ -227,7 +227,7 @@ export default function CondoReportSearch() {
     console.log(el);
     if (el != null) {
       let fileName = el.EXPORT_ADDRESS + el.EXPORT_NAME
-      var path = 'http://reportassessprice.treasury.go.th/' + fileName.replace(/\\/g, "/");
+      var path = `http://reportassessprice.treasury.go.th/${fileName.replace(/\\/g, "/")}`;
       console.log(path);
       window.open(path)
     }
