@@ -250,6 +250,10 @@ export default function DataTable(props) {
         newData.splice(i, 1);
         await setSelectedData([]);
         await setSelectedData(newData);
+        console.log(newData,'555555555555');
+        if (props.onSelect) {
+          props.onSelect(newData);
+        }
         return;
       }
     }

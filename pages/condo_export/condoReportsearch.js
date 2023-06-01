@@ -51,6 +51,7 @@ export default function CondoReportSearch() {
   const [dataList, setDatalist] = React.useState([]);
   const [province, setProvince] = React.useState([]);
   const [branch, setbBranch] = React.useState([]);
+  const [condoName, setCondoName] = React.useState("");
   const [valueprovince, setValueprovince] = React.useState(null);
   const [valuebranch, setValuebranch] = React.useState(null);
   const [dateTimeStart, setDateTimeStart] = React.useState(null);
@@ -60,6 +61,7 @@ export default function CondoReportSearch() {
   const [errorSeach, setErrorSeach] = React.useState(false);
   const [errorSeach1, setErrorSeach1] = React.useState(false);
   const [errorApprove, setErrorApprove] = React.useState(false);
+  const [dataSendRefresh, setDataSendRefresh] = React.useState(null);
 
   const _resMasProvince = async () => {
     // try {
@@ -112,7 +114,10 @@ export default function CondoReportSearch() {
     setValuebranch(value);
     setErrorSeach1(false)
   }
-
+  const handleCondoName = (event) => {
+    console.log(event.target.value,'handleCondoName');
+    setCondoName(event.target.value);
+  }
   const handleChangeStartDate = (value) => {
     setDateTimeStart(value)
     setErrorApprove(false)
@@ -127,7 +132,7 @@ export default function CondoReportSearch() {
 
 
   const sel_condoExportByProvinceId = async (el) => {
-    let url = `${process.env.hostAPI}/condo/condoExportByProvinceId`
+    let url = `${process.env.hostCondo}/CONDO/REPORT/get_condo_list`
     AddLoading()
     try {
       // let res = await ServiceCondo.getCondoExportByProvince(el)
@@ -190,24 +195,29 @@ export default function CondoReportSearch() {
       return
     }
     if (valuebranch != null) {
-
+      console.log(valuebranch, 'valuebranch');
+      data.BRANCH_CODE = valuebranch.BRANCH
     } else {
+      data.BRANCH_CODE = null
       setErrorSeach1(true)
       NotificationManager.error('กรุณาเลือกสำนักงาน', '', 5000, () => {
         alert('callback');
       });
       return
     }
-
+    data.CONDO_NAME = condoName
+    setDataSendRefresh(data)
     sel_condoExportByProvinceId(data)
   }
 
   const handleOnSelect = (el) => {
     console.log(el, 'handleOnSelect');
+    setValueOnselect([])
     setValueOnselect(el)
   }
 
   const handleOnDetail = (condo_s_id) => {
+    console.log(condo_s_id, 'handleOnDetail');
     setCondoSID(condo_s_id)
   }
   const handleCloseDetail = () => {
@@ -261,14 +271,14 @@ export default function CondoReportSearch() {
       // console.log(dataset);
       // return
       try {
-        let url = `${process.env.hostCondo}/condo/insOrderVal`
+        let url = `${process.env.hostAPI}/condo/insOrderVal`
         // let req = await ServiceOrderval.insOrderVal(data)
         let res = await axios.post(url, dataset)
         let data = res.data
         if (data) {
           chackAlert.push(valueOnselect[i].BRANCH)
         }
-        sel_condoExportByProvinceId()
+        sel_condoExportByProvinceId(dataSendRefresh)
       } catch (e) {
         console.log(e);
         RemoveLoading()
@@ -301,9 +311,12 @@ export default function CondoReportSearch() {
 
   const clearDataAll = () => {
     setValueprovince(null)
+    setValuebranch(null)
+    setCondoName("")
     setDateTimeStart(null)
     setAnnouncementDate(null)
     setDatalist([])
+    setDataSendRefresh(null)
   }
 
   React.useEffect(() => {
@@ -312,6 +325,7 @@ export default function CondoReportSearch() {
 
   return (
     <div>
+      {/* {valueOnselect.length > 0 && (<Typography>5555555555555</Typography>)} */}
       <NotificationContainer />
       {condoSID && (
         <DialogDetail
@@ -331,7 +345,7 @@ export default function CondoReportSearch() {
               <Grid item xs={12}>
                 {/* <Stack direction={'row'} justifyContent={'center'} spacing={2}> */}
                 <Grid container spacing={2} px={5} pb={3}>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={6}>
                     <Autocomplete
                       id="Province"
                       options={province}
@@ -350,7 +364,7 @@ export default function CondoReportSearch() {
                       />}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={6}>
                     <Autocomplete
                       id="Province"
                       options={branch}
@@ -369,8 +383,11 @@ export default function CondoReportSearch() {
                       />}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Stack direction={'row'} justifyContent={'center'} spacing={2}>
+                  <Grid item xs={12} sm={6} md={6}>
+                    <TextField value={condoName}  size="small" label={'กรอกชื่อคอนโด'} fullWidth onChange={handleCondoName}/>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={6}>
+                    <Stack direction={'row'} justifyContent={'end'} spacing={2}>
                       <Button
                         onClick={onHandleSubmit}
                         variant='contained'
