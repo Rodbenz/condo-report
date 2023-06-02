@@ -120,13 +120,14 @@ export default function CondoReportSearch() {
   }
   const handleChangeStartDate = (value) => {
     setDateTimeStart(value)
+    console.log(dayjs(value).format("YYYY-MM-DD"));
     setErrorApprove(false)
     // console.log(dayjs(value).format("-MM-DD"), value.$y);
 
   }
   const handleChangeAnnouncementDate = (value) => {
     setAnnouncementDate(value)
-    console.log(value);
+    console.log(dayjs(value).format("YYYY-MM-DD"));
     setErrorApprove(false)
   }
 
@@ -136,11 +137,9 @@ export default function CondoReportSearch() {
     AddLoading()
     try {
       // let res = await ServiceCondo.getCondoExportByProvince(el)
-      // console.log(res, 'sel_condoExportByProvinceId');
       let resdata = await axios.post(url, el)
       let data = resdata.data
 
-      // console.log(data, 'sel_condoExportByProvinceId');
       let newData = []
       for (const i in data) {
         let dataitems = data[i]
@@ -254,6 +253,8 @@ export default function CondoReportSearch() {
     AddLoading()
     let chackAlert = []
     for (var i in valueOnselect) {
+      let startDate = dayjs(dateTimeStart).format("YYYY-MM-DD");
+      let endDate = dayjs(announcementDate).format("YYYY-MM-DD");
       let dataset = {
         CHANGWAT_CODE: valueprovince.PROVINCE_ID,
         BRANCH_CODE: valueOnselect[i].BRANCH,
@@ -265,10 +266,10 @@ export default function CondoReportSearch() {
         ORDER_STATUS: "4",
         CREATE_BY: "1111111111",
         PUBLIC_DATE: null,
-        APPROVE_DATE: dayjs(dateTimeStart).format("YYYY-MM-DD"),
-        ENFORCE_DATE: dayjs(announcementDate).format("YYYY-MM-DD")
+        APPROVE_DATE: startDate,
+        ENFORCE_DATE: endDate
       }
-      // console.log(dataset);
+      // console.log(dataset,'dataset',startDate,endDate);
       // return
       try {
         let url = `${process.env.hostAPI}/condo/insOrderVal`

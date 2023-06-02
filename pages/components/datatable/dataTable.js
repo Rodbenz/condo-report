@@ -72,7 +72,7 @@ export default function DataTable(props) {
     if (props.data) {
       _onFilterChange();
     }
-  }, [props]);
+  }, [props.data]);
 
   React.useEffect(() => {
     console.log("props.data")
